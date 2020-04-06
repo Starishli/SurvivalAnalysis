@@ -1,8 +1,6 @@
 
 # coding: utf-8
 
-# In[2]:
-
 import time
 from lifelines.utils import concordance_index 
 import sys
@@ -14,12 +12,9 @@ from torch.utils.data import TensorDataset, Dataset
 import torch.utils.data.dataloader as dataloader
 import matplotlib
 import matplotlib.pyplot as plt
-get_ipython().magic('matplotlib inline')
+# get_ipython().magic('matplotlib inline')
 import pickle as pkl
 from sklearn.preprocessing import StandardScaler
-
-
-# In[3]:
 
 def printResults(filename,hyperparam_file):
     output=None
@@ -60,18 +55,10 @@ def printResults(filename,hyperparam_file):
     print ("NLin-S:", np.max(nlinear_s),nlinear_s_[np.argmax(nlinear_s)])
     print ("NLin-H:", np.max(nlinear_h), nlinear_h_[np.argmax(nlinear_h)])
 
-
-# In[5]:
-
 printResults('SUPPORT_results.pkl','SUPPORT_hyperparams.pkl')
 
 
-# In[4]:
-
 printResults('GBSG_results.pkl','GBSG_hyperparams.pkl')
-
-
-# In[6]:
 
 printResults('METABRIC_results.pkl','METABRIC_hyperparams.pkl')
 

@@ -16,8 +16,6 @@ import _pickle as pkl
 
 from torch.multiprocessing import Pool
 
-
-
 print("Dependencies loaded")
 
 
@@ -30,9 +28,9 @@ def get_dataset(DATASET_CHOICE):
         valid = train[-valid_size:]
         train = train[:-valid_size]
         test = ds[1310:]
-        x_train = train[['0','1', '2', '3', '4', '5']].as_matrix()
-        x_valid = valid[['0','1', '2', '3', '4', '5']].as_matrix()
-        x_test = test[['0','1', '2', '3', '4', '5']].as_matrix() 
+        x_train = train[['0','1', '2', '3', '4', '5']].value()
+        x_valid = valid[['0','1', '2', '3', '4', '5']].value()
+        x_test = test[['0','1', '2', '3', '4', '5']].value()
         name="WHAS"
     elif (DATASET_CHOICE == 2):
         # GBSG
@@ -64,9 +62,9 @@ def get_dataset(DATASET_CHOICE):
         print("Train data size: ", len(train.index))
         print("Validation data size: ", len(valid.index))
         print("Test data size: ", len(test.index))
-        x_train = train[['0','1', '2', '3', '4', '5', '6', '7', '8']].as_matrix()
-        x_valid = valid[['0','1', '2', '3', '4', '5', '6', '7', '8']].as_matrix()
-        x_test = test[['0','1', '2', '3', '4', '5', '6', '7', '8']].as_matrix() 
+        x_train = train[['0','1', '2', '3', '4', '5', '6', '7', '8']].value()
+        x_valid = valid[['0','1', '2', '3', '4', '5', '6', '7', '8']].value()
+        x_test = test[['0','1', '2', '3', '4', '5', '6', '7', '8']].value()
         name="METABRIC"
     elif (DATASET_CHOICE == 4):
         # for SUPPORT
@@ -81,11 +79,11 @@ def get_dataset(DATASET_CHOICE):
         print("Train data size: ", len(train.index))
         print("Validation data size: ", len(valid.index))
         print("Test data size: ", len(test.index))
-        x_train = train[['0','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', ]].as_matrix()
-        x_valid = valid[['0','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']].as_matrix()
-        x_test = test[['0','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']].as_matrix()
+        x_train = train[['0','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', ]].value()
+        x_valid = valid[['0','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']].value()
+        x_test = test[['0','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']].value()
         name="SUPPORT"
-    return x_train,train,x_valid,valid,x_test,test,name
+    return x_train, train, x_valid, valid, x_test, test, name
 
 
 def scale_data_to_torch(x_train,train,x_valid,valid,x_test,test):
@@ -103,19 +101,18 @@ def scale_data_to_torch(x_train,train,x_valid,valid,x_test,test):
     t_test = test['lenfol']
 
     x_train = torch.from_numpy(x_train).float()
-    e_train = torch.from_numpy(e_train.as_matrix()).float()
-    t_train = torch.from_numpy(t_train.as_matrix())
+    e_train = torch.from_numpy(e_train.value()).float()
+    t_train = torch.from_numpy(t_train.value())
 
     x_valid = torch.from_numpy(x_valid).float()
-    e_valid = torch.from_numpy(e_valid.as_matrix()).float()
-    t_valid = torch.from_numpy(t_valid.as_matrix())
-
+    e_valid = torch.from_numpy(e_valid.value()).float()
+    t_valid = torch.from_numpy(t_valid.value())
 
     x_test = torch.from_numpy(x_test).float()
-    e_test = torch.from_numpy(e_test.as_matrix()).float()
-    t_test = torch.from_numpy(t_test.as_matrix())
+    e_test = torch.from_numpy(e_test.value()).float()
+    t_test = torch.from_numpy(t_test.value())
     
-    return x_train,e_train,t_train,x_valid,e_valid,t_valid,x_test,e_test,t_test 
+    return x_train, e_train, t_train, x_valid, e_valid, t_valid, x_test, e_test, t_test
 
 
 def compute_risk_set(t_train,t_valid,t_test):
@@ -131,7 +128,6 @@ def compute_risk_set(t_train,t_valid,t_test):
     for i in range(len(t_)):
 
         risk_set_valid.append([i]+np.where(t_>t_[i])[0].tolist())
-
 
     t_ = t_test.cpu().data.numpy()
 
@@ -285,35 +281,29 @@ def run_experiment(params):
                           optimizer, n_epochs,
                           data_dict["x_test"],data_dict["e_test"],data_dict["t_test"],data_dict["risk_set_test"])   
     return metrics
-    
 
 
 print("Risk sets calculated")
 
+dataset_dict = {1: "WHAS", 2: "GBSG", 3: "METABRIC", 4: "SUPPORT"}
 
-# In[11]:
-
-dataset_dict={1:"WHAS",2:"GBSG",3:"METABRIC",4:"SUPPORT"}
-
-
-# In[ ]:
 
 def final_experiments():
     for i in range(2,5):
-        x_train,train,x_valid,valid,x_test,test,name=get_dataset(i)
-        print("Running for", name ,"dataset")
+        x_train, train, x_valid, valid, x_test, test, name = get_dataset(i)
+        print("Running for", name, "dataset")
         
-        x_train,e_train,t_train,x_valid,e_valid,t_valid,x_test,e_test,t_test = scale_data_to_torch(x_train,train,x_valid,valid,x_test,test)
+        x_train, e_train, t_train, x_valid,e_valid,t_valid,x_test,e_test,t_test = scale_data_to_torch(x_train,train,x_valid,valid,x_test,test)
         print("Dataset loaded and scaled")
         
         risk_set,risk_set_valid,risk_set_test=compute_risk_set(t_train,t_valid,t_test)
         print("Risk set computed")
         
-        data_dict={"x_train":x_train,"e_train":e_train,"t_train":t_train,
-                   "x_valid":x_valid,"e_valid":e_valid,"t_valid":t_valid,
-                   "x_test":x_test,"e_test":e_test,"t_test":t_test,
-                   "risk_set":risk_set,"risk_set_valid":risk_set_valid,"risk_set_test":risk_set_test
-                  }
+        data_dict = {"x_train": x_train, "e_train": e_train, "t_train": t_train,
+                     "x_valid": x_valid, "e_valid": e_valid, "t_valid": t_valid,
+                     "x_test": x_test, "e_test": e_test, "t_test": t_test,
+                     "risk_set": risk_set, "risk_set_valid": risk_set_valid, "risk_set_test": risk_set_test
+                    }
         
         n_in = x_train.shape[1]
         linear_models=[2,5,10,12]
@@ -338,7 +328,6 @@ def final_experiments():
         print(name,"done")
         print("")
         
-
 
 final_experiments()
 
